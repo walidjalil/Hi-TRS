@@ -1,3 +1,5 @@
+# MODIFIED BY Walid A. Jalil
+
 ########## The codes are to reproduce our reported results on the NTU-60 dataset.
 
 ########## Prerequisites:
