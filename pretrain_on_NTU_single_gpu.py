@@ -57,7 +57,7 @@ def get_data_loader(cfg):
 
     val_loader = torch.utils.data.DataLoader(
         val_dataset,
-        batch_size=128,
+        batch_size=64,
         num_workers=cfg.workers,
         collate_fn=my_collate,
         pin_memory=True,
