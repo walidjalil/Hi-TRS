@@ -33,7 +33,7 @@ class NTU_Pretrain(Dataset):
         self.w_size = w_size
         self.stride = stride
         self.dilate = dilate
-        self.joint_num = 25
+        self.joint_num = 58
         self.use_data_aug = use_data_aug
         self.view = view
 
@@ -237,7 +237,7 @@ class NTU_Pretrain(Dataset):
 
 
         # og_id = np.random.randint(3)
-        assert skeleton.shape[1:] == (25, 3) and len(skeleton.shape) == 3
+        assert skeleton.shape[1:] == (58, 3) and len(skeleton.shape) == 3
         #print(skeleton.shape)
         #ag_id = randint(0, aug_num - 1)
         #aug_id_list = list(range(aug_num))
@@ -261,7 +261,7 @@ class NTU_Pretrain(Dataset):
             else:
                 raise ValueError('invalid augmenation type')
 
-        assert skeleton.shape[1:] == (25, 3) and len(skeleton.shape) == 3
+        assert skeleton.shape[1:] == (58, 3) and len(skeleton.shape) == 3
 
         return skeleton
 
