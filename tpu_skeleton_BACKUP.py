@@ -302,17 +302,17 @@ def train(gloal_iter, model, train_loader_para, optimizer, device, cfg, last_cli
 
             if xm.is_master_ordinal():
                 #xm.save(model.state_dict(), "model.pth")
-                xm.save(model.state_dict(),
-                           '{}/iter-{}_'
-                           'train-loss-{:.4f}_'
-                           'val-loss-{:.4f}_'
-                           's-pose-{:.4f}_'
-                           'c-motion-acc-{:.4f}_'
-                           'v-motion-acc-{:.4f}_'
-                           'last_cx_acc-{:.4f}.pth'
-                           .format(model_path, gloal_iter, temp_train_log[-1], val_loss,
-                                s_pose_loss, c_motion_acc, v_motion_acc, last_cx_acc))
-
+                # xm.save(model.state_dict(),
+                #            '{}/iter-{}_'
+                #            'train-loss-{:.4f}_'
+                #            'val-loss-{:.4f}_'
+                #            's-pose-{:.4f}_'
+                #            'c-motion-acc-{:.4f}_'
+                #            'v-motion-acc-{:.4f}_'
+                #            'last_cx_acc-{:.4f}.pth'
+                #            .format(model_path, gloal_iter, temp_train_log[-1], val_loss,
+                #                 s_pose_loss, c_motion_acc, v_motion_acc, last_cx_acc))
+                xm.save(model.state_dict(), "model1.pth")
 
                 print('saving model......')
 
@@ -459,15 +459,15 @@ def mp_fn(index, cfg):
                              cfg.view
                          ))
     print(log_path)
-    writer = SummaryWriter(log_path)
+    writer = SummaryWriter("/home/walidajalil/Hi-TRS/saved")
     
      # ....folder to save ckpt
-    model_path = os.path.join(log_path, "model")
-    os.mkdir(model_path)
+    #model_path = os.path.join(log_path, "model")
+    #os.mkdir(model_path)
     
      # save training config
-    assert not os.path.exists(os.path.join(log_path, 'training_cfg.yaml'))
-    copyfile(cfg_pth, os.path.join(log_path, 'training_cfg.yaml'))
+   # assert not os.path.exists(os.path.join(log_path, 'training_cfg.yaml'))
+    #copyfile(cfg_pth, os.path.join(log_path, 'training_cfg.yaml'))
     
      # parameters recording training log
     no_improve_epoch = 0
