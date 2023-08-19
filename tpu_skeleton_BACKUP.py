@@ -439,7 +439,7 @@ def mp_fn(index, cfg):
                                                              )
     
      # scheduler = optim.lr_scheduler.StepLR(optimizer, gamma=cfg.lr_gamma, step_size=150, verbose=True)
-    last_clip_criterion = NCELoss().to(device)
+    last_clip_criterion = NCELoss(device).to(device)
      # pose_criterion = MaskedSmoothL1().cuda()
      # ....tensorboard logger
     log_path = os.path.join(cfg.log_pth,
