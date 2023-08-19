@@ -2,15 +2,15 @@ import torch
 import torch.nn as nn
 
 class NCELoss(nn.Module):
-    def __init__(self, T=0.07):
+    def __init__(self, device ,T=0.07):
         super(NCELoss, self).__init__()
 
         self.T = T
-        self.CrossEntropyLoss = nn.CrossEntropyLoss().cuda()
+        self.CrossEntropyLoss = nn.CrossEntropyLoss().to(device)
 
 
 
-    def forward(self, emb_pred, emb_gt):
+    def forward(self, emb_pred, emb_gt, device):
         # next clip matching by using nce loss
 
         #print(emb_pred.shape, emb_gt.shape)
@@ -26,7 +26,7 @@ class NCELoss(nn.Module):
         sim_matrix /= self.T
         #print('sim_matrix.shape:', sim_matrix.shape)
 
-        labels = torch.arange(0, emb_pred.shape[0], dtype=torch.long).cuda()
+        labels = torch.arange(0, emb_pred.shape[0], dtype=torch.long).to(device)
 
         loss = self.CrossEntropyLoss(sim_matrix, labels)
 

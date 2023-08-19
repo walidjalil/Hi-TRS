@@ -101,7 +101,7 @@ class Hi_TRS(nn.Module):
         self.v_ft_reg = nn.Linear(self.v_d_model, self.c_d_model)
 
         # define loss function for each task
-        self.pose_criterion = MaskedL2().to(device)
+        self.pose_criterion = MaskedL2(device).to(device)
 
         self.c_motion_criterion = torch.nn.CrossEntropyLoss(reduction='none').to(device)
         self.v_motion_criterion = torch.nn.CrossEntropyLoss().to(device)

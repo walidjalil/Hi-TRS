@@ -2,11 +2,11 @@ import torch
 import torch.nn as nn
 
 class MaskedL2(nn.Module):
-    def __init__(self):
+    def __init__(self, device):
         super(MaskedL2, self).__init__()
-        self.mask_element = torch.tensor([999, 999, 999]).cuda()
+        self.mask_element = torch.tensor([999, 999, 999]).to(device)
         #self.SmoothL1Los = nn.SmoothL1Loss(reduction='none').cuda()
-        self.SmoothL1Los = nn.SmoothL1Loss().cuda()
+        self.SmoothL1Los = nn.SmoothL1Loss().to(device)
 
     def forward(self, pred, mask_label, mask):
 
