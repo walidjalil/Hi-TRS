@@ -408,7 +408,7 @@ def mp_fn(index, cfg):
                    d_model=cfg.d_model,
                    nhead=cfg.nhead, d_att=cfg.d_att,
                    layer_num=cfg.layer_num,
-                   dp_rate=cfg.dp_rate
+                   dp_rate=cfg.dp_rate, device = device
                    )
     
     #model = torch.nn.DataParallel(model).cuda().float()

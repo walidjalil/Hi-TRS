@@ -13,7 +13,7 @@ from loss.mask_smooth_L1 import MaskedL2
 class Hi_TRS(nn.Module):
 
     # d_model, dim_feedforward, nhead, d_att, dp_rate, layer_num
-    def __init__(self, w_size, d_model, nhead, d_att, dp_rate, layer_num):
+    def __init__(self, w_size, d_model, nhead, d_att, dp_rate, layer_num, device):
         super(Hi_TRS, self).__init__()
 
 
@@ -101,10 +101,10 @@ class Hi_TRS(nn.Module):
         self.v_ft_reg = nn.Linear(self.v_d_model, self.c_d_model)
 
         # define loss function for each task
-        self.pose_criterion = MaskedL2().cuda()
+        self.pose_criterion = MaskedL2().to(device)
 
-        self.c_motion_criterion = torch.nn.CrossEntropyLoss(reduction='none').cuda()
-        self.v_motion_criterion = torch.nn.CrossEntropyLoss().cuda()
+        self.c_motion_criterion = torch.nn.CrossEntropyLoss(reduction='none').to(device)
+        self.v_motion_criterion = torch.nn.CrossEntropyLoss().to(device)
 
         print('done......')
 
@@ -156,7 +156,7 @@ class Hi_TRS(nn.Module):
 
         return x
 
-    def c_forward(self, x):
+    def c_forward(self, x, device):
 
         # input shape:
         # batch_size, w_num, w_size, joint_num, ft_dim
@@ -177,7 +177,7 @@ class Hi_TRS(nn.Module):
         clip_fuse_token = self.clip_fuse_token.repeat(x.shape[0], 1, 1)
         x = torch.cat((x, clip_fuse_token), 1)  # [-1, w_size*joint_num+1, ft_dim]
 
-        x = self.c_enc(x, mask=self.c_mask.cuda())
+        x = self.c_enc(x, mask=self.c_mask.to(device))
 
         # get embedding for each clip [batch_size*w_num, ft_dim]
         x = x.reshape(batch_size, w_num, w_size * joint_num + 1, ft_dim)
@@ -186,7 +186,7 @@ class Hi_TRS(nn.Module):
         return x
 
 
-    def v_forward(self, x, pad_mask):
+    def v_forward(self, x, pad_mask, device):
         # input:
         # c_x: [batch_size, w_num, w_size, ft_dim]
 
@@ -221,7 +221,7 @@ class Hi_TRS(nn.Module):
                  v_motion_prd,
                  last_cx_prd, last_cx_gt
                  #v_order_prd, clip_permute_idx, w_num_list
-                 ):
+                 ,device):
         # *******************
         # ***spatial level***
         # ******************
@@ -235,7 +235,7 @@ class Hi_TRS(nn.Module):
 
         #cal_loss:
         assert c_motion_prd.shape[0] == 2 * bz
-        c_motion_gt = torch.zeros(2 * bz).cuda().long()
+        c_motion_gt = torch.zeros(2 * bz).to(device).long()
         c_motion_gt[:bz] = 1
         c_motion_loss = self.c_motion_criterion(c_motion_prd, c_motion_gt)
 
@@ -250,7 +250,7 @@ class Hi_TRS(nn.Module):
         # ***video level***
         # ******************
         # motion validation
-        v_motion_gt = torch.zeros(2 * bz).cuda().long()
+        v_motion_gt = torch.zeros(2 * bz).to(device).long()
         v_motion_gt[:bz] = 1
         #1/0
         v_motion_loss = self.v_motion_criterion(v_motion_prd, v_motion_gt)
@@ -264,7 +264,7 @@ class Hi_TRS(nn.Module):
     def forward(self, masked_seq, org_seq, mask_seq_mask,
                     c_motion_clip, c_motion_valid_flg,
                     slid_window, permute_v, w_pad_masks,
-                    last_c):
+                    last_c, device):
 
         c_forward = self.c_forward
         v_forward = self.v_forward
@@ -290,7 +290,7 @@ class Hi_TRS(nn.Module):
         assert c_ord_sx.shape[:-1] == (batch_size, 2, self.w_size, self.j_num)
 
         #--get  embeding for each clip
-        c_ord_cx = c_forward(c_ord_sx)
+        c_ord_cx = c_forward(c_ord_sx, device)
         assert c_ord_cx.shape[:-1] == (batch_size, 2)
 
         #--make prediction
@@ -303,10 +303,10 @@ class Hi_TRS(nn.Module):
         v_s_x = s_x[:, slid_window]
         assert v_s_x.shape[:-1] == (batch_size, len(slid_window), self.w_size, self.j_num)
         #extract embedding for each clip
-        c_x = c_forward(v_s_x)
+        c_x = c_forward(v_s_x, device)
         assert c_x.shape[:-1] == (batch_size, len(slid_window)) and len(c_x.shape) == 3
         #get video embedding
-        vx_org, v_cx_org = v_forward(c_x, w_pad_masks)
+        vx_org, v_cx_org = v_forward(c_x, w_pad_masks, device)
         assert vx_org.shape[0] == batch_size and len(vx_org.shape) == 2
 
         #----feature regression
@@ -319,7 +319,7 @@ class Hi_TRS(nn.Module):
             last_c_sx.append(ele)
         last_c_sx = torch.cat(last_c_sx, 0).unsqueeze(1) # (batch_size, 1, self.w_size, self.j_num)
         assert last_c_sx.shape[:-1] == (batch_size, 1, self.w_size, self.j_num)
-        last_cx_gt = c_forward(last_c_sx).squeeze().detach()
+        last_cx_gt = c_forward(last_c_sx, device).squeeze().detach()
         #get_prd
         last_cx_prd = self.v_ft_reg(vx_org).squeeze()
 
@@ -330,7 +330,7 @@ class Hi_TRS(nn.Module):
 
         permute_v_cx = torch.cat(permute_v_cx, 0)
         assert c_x.shape == permute_v_cx.shape
-        vx_permute, _ = v_forward(permute_v_cx, w_pad_masks)
+        vx_permute, _ = v_forward(permute_v_cx, w_pad_masks, device)
 
 
         v_motion_prd = self.v_motion_cls(torch.cat([vx_org, vx_permute], 0)).squeeze()
@@ -341,11 +341,11 @@ class Hi_TRS(nn.Module):
         return self.cal_loss(s_pose_pred=s_pose_pred, org_seq=org_seq, mask_seq_mask=mask_seq_mask,
                              c_motion_prd=c_motion_prd, c_motion_valid_flg=c_motion_valid_flg,
                             v_motion_prd=v_motion_prd,
-                            last_cx_gt=last_cx_gt, last_cx_prd=last_cx_prd)
+                            last_cx_gt=last_cx_gt, last_cx_prd=last_cx_prd, device=device)
 
 
 
-    def clip_cls_forward(self, x):
+    def clip_cls_forward(self, x, device):
 
         #x: bacth_size, w_num, person_num, joint_num, joint_dim
         assert len(x.shape) == 5 and x.shape[1:] == (2, self.w_size, self.j_num, self.j_dim)
@@ -366,7 +366,7 @@ class Hi_TRS(nn.Module):
 
         x = self.s_forward(x)
         #print(x.shape)
-        x = self.c_forward(x)
+        x = self.c_forward(x, device)
         #print(x.shape)
         x = x.view(batch_size, 2, x.shape[-1])
         #print(x.shape)
