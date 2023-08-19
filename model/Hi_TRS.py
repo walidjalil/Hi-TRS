@@ -17,7 +17,7 @@ class Hi_TRS(nn.Module):
         super(Hi_TRS, self).__init__()
 
 
-        self.j_num = 58
+        self.j_num = 25
         self.j_dim = 3
 
         self.s_d_model = d_model
