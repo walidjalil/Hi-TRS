@@ -5,6 +5,7 @@ import os.path as osp
 import random
 import pickle
 import copy
+import sys
 
 
 class NTU_Pretrain(Dataset):
@@ -70,7 +71,11 @@ class NTU_Pretrain(Dataset):
         for idx, ele in enumerate(self.len_list):
             if ele > (2 * stride / 0.8) + 1: #contains at least 3 windows after cropping
                 self.valid_idx.append(idx)
-
+        
+        print("seq_list.shape[-1]: ", self.seq_list.shape[-1])
+        print("seq_list.shape[-2]: ", self.seq_list.shape[-2])
+        print("self.joint_num: ", self.joint_num)
+        sys.exit("We are exiting")
         assert self.seq_list.shape[-1] == 3 and self.seq_list.shape[-2] == self.joint_num
 
         print('data num:', len(self.valid_idx))
