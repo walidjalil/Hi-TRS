@@ -442,7 +442,7 @@ def mp_fn(index, cfg):
     last_clip_criterion = NCELoss(device).to(device)
      # pose_criterion = MaskedSmoothL1().cuda()
      # ....tensorboard logger
-    log_path = os.path.join(cfg.log_pth,
+    log_path = os.path.join('model/',
                          cfg.benchmark,
                          'dim-{}_nhead-{}_d-att-{}_layer-{}_'
                          'w-size-{}_strde-{}_dilate-{}_'
