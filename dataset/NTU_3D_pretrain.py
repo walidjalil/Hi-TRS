@@ -34,7 +34,7 @@ class NTU_Pretrain(Dataset):
         self.w_size = w_size
         self.stride = stride
         self.dilate = dilate
-        self.joint_num = 25
+        self.joint_num = 58
         self.use_data_aug = use_data_aug
         self.view = view
 
