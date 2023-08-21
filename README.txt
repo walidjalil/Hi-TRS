@@ -3,7 +3,7 @@
 ########## Prerequisites:
 python-3.8
 pytorch-1.7.0
-pyyaml-5.3.1  (pyyaml-6.x wont work, also 5.4.x will fail with newer python versions. /Walid)
+pyyaml-5.3.1  (pyyaml-6.x wont work, also 5.4.x might fail with newer python versions. /Walid)
 numpy
 tensorboardx
 
